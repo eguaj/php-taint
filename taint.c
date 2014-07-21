@@ -1838,6 +1838,16 @@ static void php_taint_fcall_check(ZEND_OPCODE_HANDLER_ARGS, zend_op *opline, cha
 				}
 				break;
 			}
+
+			if (strncmp("pg_query", fname, len) == 0) {
+				zval *el;
+				el = *((zval **) (p - 1));
+				if (el && IS_STRING == Z_TYPE_P(el) && PHP_TAINT_POSSIBLE(el)) {
+					php_taint_error(NULL TSRMLS_CC, "SQL statement contains data that might be tainted");
+				}
+				break;
+			}
+
 #if 0
 			if (strncmp("escapeshellcmd", fname, len) == 0
 					|| strncmp("htmlspecialchars", fname, len) == 0
